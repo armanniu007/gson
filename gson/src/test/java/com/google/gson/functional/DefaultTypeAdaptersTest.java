@@ -27,6 +27,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.TypeAdapter;
+import com.google.gson.internal.JavaVersion;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -55,6 +56,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.UUID;
+
 import junit.framework.TestCase;
 
 /**
@@ -85,20 +87,20 @@ public class DefaultTypeAdaptersTest extends TestCase {
 
   public void testClassSerialization() {
     try {
-      gson.toJson(String.class);  
+      gson.toJson(String.class);
     } catch (UnsupportedOperationException expected) {}
     // Override with a custom type adapter for class.
     gson = new GsonBuilder().registerTypeAdapter(Class.class, new MyClassTypeAdapter()).create();
-    assertEquals("\"java.lang.String\"", gson.toJson(String.class));  
+    assertEquals("\"java.lang.String\"", gson.toJson(String.class));
   }
 
   public void testClassDeserialization() {
     try {
-      gson.fromJson("String.class", String.class.getClass());  
+      gson.fromJson("String.class", String.class.getClass());
     } catch (UnsupportedOperationException expected) {}
     // Override with a custom type adapter for class.
     gson = new GsonBuilder().registerTypeAdapter(Class.class, new MyClassTypeAdapter()).create();
-    assertEquals(String.class, gson.fromJson("java.lang.String", Class.class));  
+    assertEquals(String.class, gson.fromJson("java.lang.String", Class.class));
   }
 
   public void testUrlSerialization() throws Exception {
@@ -328,7 +330,11 @@ public class DefaultTypeAdaptersTest extends TestCase {
   public void testDefaultDateSerialization() {
     Date now = new Date(1315806903103L);
     String json = gson.toJson(now);
-    assertEquals("\"Sep 11, 2011 10:55:03 PM\"", json);
+    if (JavaVersion.isJava9OrLater()) {
+      assertEquals("\"Sep 11, 2011, 10:55:03 PM\"", json);
+    } else {
+      assertEquals("\"Sep 11, 2011 10:55:03 PM\"", json);
+    }
   }
 
   public void testDefaultDateDeserialization() {
@@ -369,7 +375,11 @@ public class DefaultTypeAdaptersTest extends TestCase {
   public void testDefaultJavaSqlTimestampSerialization() {
     Timestamp now = new java.sql.Timestamp(1259875082000L);
     String json = gson.toJson(now);
-    assertEquals("\"Dec 3, 2009 1:18:02 PM\"", json);
+    if (JavaVersion.isJava9OrLater()) {
+      assertEquals("\"Dec 3, 2009, 1:18:02 PM\"", json);
+    } else {
+      assertEquals("\"Dec 3, 2009 1:18:02 PM\"", json);
+    }
   }
 
   public void testDefaultJavaSqlTimestampDeserialization() {
@@ -395,7 +405,11 @@ public class DefaultTypeAdaptersTest extends TestCase {
     Gson gson = new GsonBuilder().create();
     Date now = new Date(1315806903103L);
     String json = gson.toJson(now);
-    assertEquals("\"Sep 11, 2011 10:55:03 PM\"", json);
+    if (JavaVersion.isJava9OrLater()) {
+      assertEquals("\"Sep 11, 2011, 10:55:03 PM\"", json);
+    } else {
+      assertEquals("\"Sep 11, 2011 10:55:03 PM\"", json);
+    }
   }
 
   public void testDefaultDateDeserializationUsingBuilder() throws Exception {
